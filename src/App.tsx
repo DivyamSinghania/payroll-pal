@@ -3,7 +3,16 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+
 import Index from "./pages/Index";
+import Auth from "./pages/Auth";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminSalarySlips from "./pages/admin/AdminSalarySlips";
+import AdminEmployees from "./pages/admin/AdminEmployees";
+import EmployeeDashboard from "./pages/employee/EmployeeDashboard";
+import EmployeeSalarySlips from "./pages/employee/EmployeeSalarySlips";
+import EmployeeExpenses from "./pages/employee/EmployeeExpenses";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -16,7 +25,22 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/auth" element={<Auth />} />
+          
+          {/* Admin Routes */}
+          <Route path="/admin" element={<DashboardLayout role="admin" />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="salary-slips" element={<AdminSalarySlips />} />
+            <Route path="employees" element={<AdminEmployees />} />
+          </Route>
+          
+          {/* Employee Routes */}
+          <Route path="/employee" element={<DashboardLayout role="employee" />}>
+            <Route index element={<EmployeeDashboard />} />
+            <Route path="salary-slips" element={<EmployeeSalarySlips />} />
+            <Route path="expenses" element={<EmployeeExpenses />} />
+          </Route>
+          
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
