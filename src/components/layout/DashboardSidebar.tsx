@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { UserRole } from "@/types/payroll";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface DashboardSidebarProps {
   role: UserRole;
@@ -28,10 +30,17 @@ const employeeLinks = [
 
 export function DashboardSidebar({ role }: DashboardSidebarProps) {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
+  const { toast } = useToast();
   const links = role === 'admin' ? adminLinks : employeeLinks;
 
-  const handleLogout = () => {
-    navigate('/');
+  const handleLogout = async () => {
+    await signOut();
+    toast({
+      title: "Logged out",
+      description: "You have been successfully logged out.",
+    });
+    navigate('/auth');
   };
 
   return (

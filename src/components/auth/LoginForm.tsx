@@ -3,10 +3,9 @@ import { Eye, EyeOff, Mail, Lock, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RoleToggle } from "./RoleToggle";
-import type { UserRole } from "@/types/payroll";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface LoginFormProps {
   onSwitchToSignup: () => void;
@@ -15,7 +14,7 @@ interface LoginFormProps {
 export function LoginForm({ onSwitchToSignup }: LoginFormProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [role, setRole] = useState<UserRole>('employee');
+  const { signIn } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -50,22 +49,38 @@ export function LoginForm({ onSwitchToSignup }: LoginFormProps) {
 
     setIsLoading(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    const { error } = await signIn(formData.email, formData.password);
+    
+    if (error) {
+      setIsLoading(false);
+      
+      if (error.message.includes('Invalid login credentials')) {
+        toast({
+          title: "Login failed",
+          description: "Invalid email or password. Please try again.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Login failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+      return;
+    }
     
     toast({
       title: "Login successful",
-      description: `Welcome back! Redirecting to ${role} dashboard...`,
+      description: "Welcome back! Redirecting to dashboard...",
     });
     
     setIsLoading(false);
-    navigate(role === 'admin' ? '/admin' : '/employee');
+    // Navigation will be handled by AuthContext role detection
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <RoleToggle selectedRole={role} onRoleChange={setRole} />
-
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="email">Email Address</Label>

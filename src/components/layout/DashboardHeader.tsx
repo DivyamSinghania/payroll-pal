@@ -3,14 +3,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { UserRole } from "@/types/payroll";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface DashboardHeaderProps {
   role: UserRole;
 }
 
 export function DashboardHeader({ role }: DashboardHeaderProps) {
-  const userName = role === 'admin' ? 'Admin User' : 'John Doe';
-  const userInitials = role === 'admin' ? 'AU' : 'JD';
+  const { user } = useAuth();
+  
+  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+  const userInitials = userName
+    .split(' ')
+    .map((n: string) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-card px-6">

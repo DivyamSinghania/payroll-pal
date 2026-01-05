@@ -3,22 +3,38 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ExpenseForm } from "@/components/dashboard/ExpenseForm";
 import { ExpensesTable } from "@/components/dashboard/ExpensesTable";
-import { mockExpenses } from "@/data/mockData";
-import { Search, Filter } from "lucide-react";
+import { useExpenses } from "@/hooks/useExpenses";
+import { Search, Filter, Loader2 } from "lucide-react";
+import type { Expense } from "@/types/payroll";
 
 export default function EmployeeExpenses() {
   const [searchQuery, setSearchQuery] = useState("");
+  const { data: expensesData = [], isLoading } = useExpenses();
 
-  const filteredExpenses = mockExpenses.filter(exp =>
+  // Transform database expenses to match the Expense type
+  const expenses: Expense[] = expensesData.map(exp => ({
+    id: exp.id,
+    employee_id: exp.employee_id,
+    title: exp.title,
+    category: exp.category,
+    amount: exp.amount,
+    date: exp.date,
+    status: exp.status,
+    description: exp.description,
+    created_at: exp.created_at,
+    updated_at: exp.updated_at,
+  }));
+
+  const filteredExpenses = expenses.filter(exp =>
     exp.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     exp.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const pendingTotal = mockExpenses
+  const pendingTotal = expenses
     .filter(e => e.status === 'pending')
     .reduce((sum, e) => sum + e.amount, 0);
 
-  const approvedTotal = mockExpenses
+  const approvedTotal = expenses
     .filter(e => e.status === 'approved')
     .reduce((sum, e) => sum + e.amount, 0);
 
@@ -33,7 +49,7 @@ export default function EmployeeExpenses() {
       <div className="grid gap-4 md:grid-cols-4">
         <div className="stat-card">
           <p className="text-sm text-muted-foreground">Total Submitted</p>
-          <p className="text-2xl font-semibold text-foreground">{mockExpenses.length}</p>
+          <p className="text-2xl font-semibold text-foreground">{expenses.length}</p>
         </div>
         <div className="stat-card">
           <p className="text-sm text-muted-foreground">Pending Amount</p>
@@ -50,7 +66,7 @@ export default function EmployeeExpenses() {
         <div className="stat-card">
           <p className="text-sm text-muted-foreground">Pending Claims</p>
           <p className="text-2xl font-semibold text-foreground">
-            {mockExpenses.filter(e => e.status === 'pending').length}
+            {expenses.filter(e => e.status === 'pending').length}
           </p>
         </div>
       </div>
@@ -78,7 +94,17 @@ export default function EmployeeExpenses() {
       {/* Expense History */}
       <div className="space-y-4">
         <h2 className="text-lg font-semibold text-foreground">Expense History</h2>
-        <ExpensesTable expenses={filteredExpenses} />
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : filteredExpenses.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground">
+            No expenses found. Submit your first expense above.
+          </div>
+        ) : (
+          <ExpensesTable expenses={filteredExpenses} />
+        )}
       </div>
     </div>
   );

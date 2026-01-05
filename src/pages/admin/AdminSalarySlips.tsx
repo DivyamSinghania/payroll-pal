@@ -3,16 +3,39 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SalarySlipForm } from "@/components/dashboard/SalarySlipForm";
 import { SalarySlipsTable } from "@/components/dashboard/SalarySlipsTable";
-import { mockSalarySlips } from "@/data/mockData";
-import { Search, Filter } from "lucide-react";
+import { useSalarySlips } from "@/hooks/useSalarySlips";
+import { useProfiles } from "@/hooks/useProfiles";
+import { Search, Filter, Loader2 } from "lucide-react";
 
 export default function AdminSalarySlips() {
   const [searchQuery, setSearchQuery] = useState("");
+  const { data: salarySlips = [], isLoading: slipsLoading } = useSalarySlips();
+  const { data: profiles = [], isLoading: profilesLoading } = useProfiles();
 
-  const filteredSlips = mockSalarySlips.filter(slip =>
-    slip.employeeName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    slip.department.toLowerCase().includes(searchQuery.toLowerCase())
+  const isLoading = slipsLoading || profilesLoading;
+
+  // Map slips with profile info
+  const slipsWithInfo = salarySlips.map(slip => {
+    const profile = profiles.find(p => p.user_id === slip.employee_id);
+    return {
+      ...slip,
+      employeeName: profile?.full_name || profile?.email || 'Unknown',
+      department: profile?.department || 'N/A',
+    };
+  });
+
+  const filteredSlips = slipsWithInfo.filter(slip =>
+    (slip.employeeName?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+    (slip.department?.toLowerCase() || '').includes(searchQuery.toLowerCase())
   );
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -44,7 +67,13 @@ export default function AdminSalarySlips() {
       </div>
 
       {/* Table */}
-      <SalarySlipsTable slips={filteredSlips} />
+      {filteredSlips.length === 0 ? (
+        <div className="text-center py-12 text-muted-foreground">
+          No salary slips found.
+        </div>
+      ) : (
+        <SalarySlipsTable slips={filteredSlips} />
+      )}
     </div>
   );
 }

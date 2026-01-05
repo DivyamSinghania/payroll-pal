@@ -11,22 +11,19 @@ import {
 } from "@/components/ui/select";
 import { Loader2, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useCreateSalarySlip } from "@/hooks/useSalarySlips";
+import { useProfiles } from "@/hooks/useProfiles";
 
 const months = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
 ];
 
-const employees = [
-  { id: "1", name: "John Doe", department: "Engineering" },
-  { id: "2", name: "Jane Smith", department: "Design" },
-  { id: "3", name: "Mike Johnson", department: "Marketing" },
-  { id: "4", name: "Sarah Williams", department: "HR" },
-];
-
 export function SalarySlipForm() {
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const createSalarySlip = useCreateSalarySlip();
+  const { data: profiles = [] } = useProfiles();
+  
   const [formData, setFormData] = useState({
     employeeId: '',
     month: '',
@@ -38,29 +35,65 @@ export function SalarySlipForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    if (!formData.employeeId || !formData.month || !formData.basicSalary) {
+      toast({
+        title: "Missing fields",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    toast({
-      title: "Salary slip created",
-      description: "The salary slip has been generated successfully.",
-    });
+    const basic = parseFloat(formData.basicSalary) || 0;
+    const allowances = parseFloat(formData.allowances) || 0;
+    const deductions = parseFloat(formData.deductions) || 0;
+    const netSalary = basic + allowances - deductions;
 
-    setIsLoading(false);
-    setFormData({
-      employeeId: '',
-      month: '',
-      year: new Date().getFullYear().toString(),
-      basicSalary: '',
-      allowances: '',
-      deductions: '',
-    });
+    try {
+      await createSalarySlip.mutateAsync({
+        employee_id: formData.employeeId,
+        month: formData.month,
+        year: parseInt(formData.year),
+        basic_salary: basic,
+        allowances: allowances,
+        deductions: deductions,
+        net_salary: netSalary,
+        status: 'pending',
+      });
+
+      toast({
+        title: "Salary slip created",
+        description: "The salary slip has been generated successfully.",
+      });
+
+      setFormData({
+        employeeId: '',
+        month: '',
+        year: new Date().getFullYear().toString(),
+        basicSalary: '',
+        allowances: '',
+        deductions: '',
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create salary slip. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const netSalary = Number(formData.basicSalary || 0) + 
                    Number(formData.allowances || 0) - 
                    Number(formData.deductions || 0);
+
+  // Convert profiles to employee options
+  const employees = profiles.map(p => ({
+    id: p.user_id,
+    name: p.full_name || p.email.split('@')[0],
+    department: p.department || 'General',
+  }));
 
   return (
     <form onSubmit={handleSubmit} className="card-elevated">
@@ -154,8 +187,8 @@ export function SalarySlipForm() {
             ₹{netSalary.toLocaleString('en-IN')}
           </p>
         </div>
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? (
+        <Button type="submit" disabled={createSalarySlip.isPending}>
+          {createSalarySlip.isPending ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
               Creating...
