@@ -1,10 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { SignupForm } from "@/components/auth/SignupForm";
 import { Building2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
+  const navigate = useNavigate();
+  const { user, role, loading } = useAuth();
+
+  // Redirect authenticated users to their dashboard
+  useEffect(() => {
+    if (!loading && user && role) {
+      const redirectPath = role === 'admin' ? '/admin' : '/employee';
+      navigate(redirectPath, { replace: true });
+    }
+  }, [user, role, loading, navigate]);
 
   return (
     <div className="min-h-screen bg-background flex">

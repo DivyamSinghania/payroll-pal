@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Loader2, Upload, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useCreateExpense } from "@/hooks/useExpenses";
 
 const categories = [
   "Travel",
@@ -25,7 +26,7 @@ const categories = [
 
 export function ExpenseForm() {
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const createExpense = useCreateExpense();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -36,23 +37,45 @@ export function ExpenseForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    if (!formData.title || !formData.amount || !formData.category || !formData.date) {
+      toast({
+        title: "Missing fields",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    toast({
-      title: "Expense submitted",
-      description: "Your expense claim has been submitted for approval.",
-    });
+    try {
+      await createExpense.mutateAsync({
+        title: formData.title,
+        category: formData.category,
+        amount: parseFloat(formData.amount),
+        date: formData.date,
+        description: formData.description || undefined,
+        status: 'pending',
+      });
 
-    setIsLoading(false);
-    setFormData({
-      title: '',
-      description: '',
-      amount: '',
-      category: '',
-      date: '',
-    });
+      toast({
+        title: "Expense submitted",
+        description: "Your expense claim has been submitted for approval.",
+      });
+
+      setFormData({
+        title: '',
+        description: '',
+        amount: '',
+        category: '',
+        date: '',
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit expense. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -135,8 +158,8 @@ export function ExpenseForm() {
       </div>
 
       <div className="mt-6 flex justify-end">
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? (
+        <Button type="submit" disabled={createExpense.isPending}>
+          {createExpense.isPending ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
               Submitting...

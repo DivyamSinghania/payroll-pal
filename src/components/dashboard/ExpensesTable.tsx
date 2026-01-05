@@ -50,7 +50,7 @@ export function ExpensesTable({ expenses }: ExpensesTableProps) {
               <TableCell>
                 <div>
                   <p className="font-medium text-foreground">{expense.title}</p>
-                  <p className="text-xs text-muted-foreground line-clamp-1">{expense.description}</p>
+                  <p className="text-xs text-muted-foreground line-clamp-1">{expense.description || ''}</p>
                 </div>
               </TableCell>
               <TableCell>

@@ -61,10 +61,10 @@ export function SalarySlipsTable({ slips, showEmployee = true }: SalarySlipsTabl
               <TableCell>
                 {slip.month} {slip.year}
               </TableCell>
-              <TableCell>{formatCurrency(slip.basicSalary)}</TableCell>
+              <TableCell>{formatCurrency(slip.basic_salary)}</TableCell>
               <TableCell className="text-success">+{formatCurrency(slip.allowances)}</TableCell>
               <TableCell className="text-destructive">-{formatCurrency(slip.deductions)}</TableCell>
-              <TableCell className="font-medium">{formatCurrency(slip.netSalary)}</TableCell>
+              <TableCell className="font-medium">{formatCurrency(slip.net_salary)}</TableCell>
               <TableCell>
                 <Badge variant="outline" className={cn("capitalize", statusStyles[slip.status])}>
                   {slip.status}

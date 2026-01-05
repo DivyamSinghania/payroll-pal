@@ -2,21 +2,38 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SalarySlipsTable } from "@/components/dashboard/SalarySlipsTable";
-import { mockSalarySlips } from "@/data/mockData";
-import { Search, Download } from "lucide-react";
+import { useSalarySlips } from "@/hooks/useSalarySlips";
+import { useAuth } from "@/contexts/AuthContext";
+import { Search, Download, Loader2 } from "lucide-react";
 
 export default function EmployeeSalarySlips() {
   const [searchQuery, setSearchQuery] = useState("");
+  const { user } = useAuth();
+  const { data: salarySlips = [], isLoading } = useSalarySlips();
 
-  // Filter for current employee's slips
-  const mySlips = mockSalarySlips.filter(s => s.employeeId === "1");
+  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+
+  // Add employee name to slips for display
+  const mySlips = salarySlips.map(s => ({
+    ...s,
+    employeeName: userName,
+    department: 'Employee',
+  }));
   
   const filteredSlips = mySlips.filter(slip =>
     slip.month.toLowerCase().includes(searchQuery.toLowerCase()) ||
     slip.year.toString().includes(searchQuery)
   );
 
-  const totalEarnings = mySlips.reduce((sum, s) => sum + s.netSalary, 0);
+  const totalEarnings = mySlips.reduce((sum, s) => sum + s.net_salary, 0);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -46,7 +63,7 @@ export default function EmployeeSalarySlips() {
         <div className="stat-card">
           <p className="text-sm text-muted-foreground">Average Monthly</p>
           <p className="text-2xl font-semibold text-foreground">
-            ₹{Math.round(totalEarnings / mySlips.length).toLocaleString('en-IN')}
+            ₹{mySlips.length > 0 ? Math.round(totalEarnings / mySlips.length).toLocaleString('en-IN') : 0}
           </p>
         </div>
       </div>
@@ -63,7 +80,13 @@ export default function EmployeeSalarySlips() {
       </div>
 
       {/* Table */}
-      <SalarySlipsTable slips={filteredSlips} showEmployee={false} />
+      {filteredSlips.length === 0 ? (
+        <div className="text-center py-12 text-muted-foreground">
+          No salary slips found.
+        </div>
+      ) : (
+        <SalarySlipsTable slips={filteredSlips} showEmployee={false} />
+      )}
     </div>
   );
 }

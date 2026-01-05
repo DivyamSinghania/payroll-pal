@@ -11,30 +11,32 @@ export interface User {
 
 export interface SalarySlip {
   id: string;
-  employeeId: string;
-  employeeName: string;
-  department: string;
+  employee_id: string;
+  employeeName?: string;
+  department?: string;
   month: string;
   year: number;
-  basicSalary: number;
+  basic_salary: number;
   allowances: number;
   deductions: number;
-  netSalary: number;
+  net_salary: number;
   status: 'pending' | 'approved' | 'paid';
-  createdAt: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Expense {
   id: string;
-  employeeId: string;
+  employee_id: string;
   title: string;
-  description: string;
+  description?: string;
   amount: number;
   category: string;
   date: string;
   status: 'pending' | 'approved' | 'rejected';
   receipt?: string;
-  createdAt: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Employee {

@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { RoleToggle } from "./RoleToggle";
 import type { UserRole } from "@/types/payroll";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SignupFormProps {
   onSwitchToLogin: () => void;
@@ -13,6 +14,7 @@ interface SignupFormProps {
 
 export function SignupForm({ onSwitchToLogin }: SignupFormProps) {
   const { toast } = useToast();
+  const { signUp } = useAuth();
   const [role, setRole] = useState<UserRole>('employee');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -62,16 +64,34 @@ export function SignupForm({ onSwitchToLogin }: SignupFormProps) {
 
     setIsLoading(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    const { error } = await signUp(formData.email, formData.password, formData.name, role);
+    
+    if (error) {
+      setIsLoading(false);
+      
+      if (error.message.includes('User already registered')) {
+        toast({
+          title: "Account exists",
+          description: "An account with this email already exists. Please sign in.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Signup failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+      return;
+    }
     
     toast({
       title: "Account created successfully",
-      description: "Please sign in with your new credentials.",
+      description: "You are now signed in!",
     });
     
     setIsLoading(false);
-    onSwitchToLogin();
+    // Navigation will be handled by AuthContext
   };
 
   return (
