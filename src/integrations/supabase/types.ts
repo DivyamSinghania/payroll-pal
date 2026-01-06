@@ -57,27 +57,39 @@ export type Database = {
         Row: {
           created_at: string
           department: string | null
+          designation: string | null
           email: string
           full_name: string | null
           id: string
+          join_date: string | null
+          salary: number | null
+          status: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
           department?: string | null
+          designation?: string | null
           email: string
           full_name?: string | null
           id?: string
+          join_date?: string | null
+          salary?: number | null
+          status?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
           department?: string | null
+          designation?: string | null
           email?: string
           full_name?: string | null
           id?: string
+          join_date?: string | null
+          salary?: number | null
+          status?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -148,9 +160,53 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      employees_view: {
+        Row: {
+          created_at: string | null
+          department: string | null
+          designation: string | null
+          email: string | null
+          full_name: string | null
+          id: string | null
+          join_date: string | null
+          salary: number | null
+          status: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      get_approved_slips_count: { Args: never; Returns: number }
+      get_employee_count: { Args: never; Returns: number }
+      get_employee_salary_history: {
+        Args: { _employee_id: string }
+        Returns: {
+          month: string
+          net_salary: number
+          status: string
+          year: number
+        }[]
+      }
+      get_monthly_expense_trend: {
+        Args: never
+        Returns: {
+          month: string
+          total: number
+          year: number
+        }[]
+      }
+      get_monthly_payroll_trend: {
+        Args: never
+        Returns: {
+          month: string
+          total: number
+          year: number
+        }[]
+      }
+      get_pending_expenses_count: { Args: never; Returns: number }
+      get_total_payroll: { Args: never; Returns: number }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
