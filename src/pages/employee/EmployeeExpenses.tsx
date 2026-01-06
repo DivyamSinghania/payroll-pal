@@ -3,32 +3,32 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ExpenseForm } from "@/components/dashboard/ExpenseForm";
 import { ExpensesTable } from "@/components/dashboard/ExpensesTable";
-import { useExpenses } from "@/hooks/useExpenses";
+import { useExpenses, useDeleteExpense } from "@/hooks/useExpenses";
 import { Search, Filter, Loader2 } from "lucide-react";
-import type { Expense } from "@/types/payroll";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
+
+const CATEGORIES = ['Travel', 'Equipment', 'Software', 'Office Supplies', 'Training', 'Other'];
 
 export default function EmployeeExpenses() {
   const [searchQuery, setSearchQuery] = useState("");
-  const { data: expensesData = [], isLoading } = useExpenses();
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [page, setPage] = useState(1);
 
-  // Transform database expenses to match the Expense type
-  const expenses: Expense[] = expensesData.map(exp => ({
-    id: exp.id,
-    employee_id: exp.employee_id,
-    title: exp.title,
-    category: exp.category,
-    amount: exp.amount,
-    date: exp.date,
-    status: exp.status,
-    description: exp.description,
-    created_at: exp.created_at,
-    updated_at: exp.updated_at,
-  }));
+  const { data: expensesData, isLoading } = useExpenses({
+    search: searchQuery,
+    status: statusFilter,
+    category: categoryFilter,
+    page,
+    pageSize: 10,
+  });
 
-  const filteredExpenses = expenses.filter(exp =>
-    exp.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    exp.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const deleteMutation = useDeleteExpense();
+
+  const expenses = expensesData?.expenses || [];
+  const totalPages = expensesData?.totalPages || 1;
+  const total = expensesData?.total || 0;
 
   const pendingTotal = expenses
     .filter(e => e.status === 'pending')
@@ -37,6 +37,15 @@ export default function EmployeeExpenses() {
   const approvedTotal = expenses
     .filter(e => e.status === 'approved')
     .reduce((sum, e) => sum + e.amount, 0);
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteMutation.mutateAsync(id);
+      toast.success("Expense deleted successfully");
+    } catch (error) {
+      toast.error("Failed to delete expense");
+    }
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -49,7 +58,7 @@ export default function EmployeeExpenses() {
       <div className="grid gap-4 md:grid-cols-4">
         <div className="stat-card">
           <p className="text-sm text-muted-foreground">Total Submitted</p>
-          <p className="text-2xl font-semibold text-foreground">{expenses.length}</p>
+          <p className="text-2xl font-semibold text-foreground">{total}</p>
         </div>
         <div className="stat-card">
           <p className="text-sm text-muted-foreground">Pending Amount</p>
@@ -75,20 +84,38 @@ export default function EmployeeExpenses() {
       <ExpenseForm />
 
       {/* Search and Filter */}
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-wrap items-center gap-4">
+        <div className="relative flex-1 min-w-[200px] max-w-sm">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search expenses..."
             className="pl-10"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
           />
         </div>
-        <Button variant="outline">
-          <Filter className="h-4 w-4 mr-2" />
-          Filters
-        </Button>
+        <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
+          <SelectTrigger className="w-[150px]">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="approved">Approved</SelectItem>
+            <SelectItem value="rejected">Rejected</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={categoryFilter} onValueChange={(v) => { setCategoryFilter(v); setPage(1); }}>
+          <SelectTrigger className="w-[150px]">
+            <SelectValue placeholder="Category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            {CATEGORIES.map(c => (
+              <SelectItem key={c} value={c}>{c}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Expense History */}
@@ -98,12 +125,25 @@ export default function EmployeeExpenses() {
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
-        ) : filteredExpenses.length === 0 ? (
+        ) : expenses.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             No expenses found. Submit your first expense above.
           </div>
         ) : (
-          <ExpensesTable expenses={filteredExpenses} />
+          <>
+            <ExpensesTable expenses={expenses} onDelete={handleDelete} />
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2">
+                <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(p => p - 1)}>
+                  Previous
+                </Button>
+                <span className="text-sm text-muted-foreground">Page {page} of {totalPages}</span>
+                <Button variant="outline" size="sm" disabled={page === totalPages} onClick={() => setPage(p => p + 1)}>
+                  Next
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
