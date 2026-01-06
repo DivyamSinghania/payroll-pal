@@ -160,22 +160,7 @@ export type Database = {
       }
     }
     Views: {
-      employees_view: {
-        Row: {
-          created_at: string | null
-          department: string | null
-          designation: string | null
-          email: string | null
-          full_name: string | null
-          id: string | null
-          join_date: string | null
-          salary: number | null
-          status: string | null
-          updated_at: string | null
-          user_id: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       get_approved_slips_count: { Args: never; Returns: number }
@@ -187,6 +172,22 @@ export type Database = {
           net_salary: number
           status: string
           year: number
+        }[]
+      }
+      get_employees: {
+        Args: never
+        Returns: {
+          created_at: string
+          department: string
+          designation: string
+          email: string
+          full_name: string
+          id: string
+          join_date: string
+          salary: number
+          status: string
+          updated_at: string
+          user_id: string
         }[]
       }
       get_monthly_expense_trend: {

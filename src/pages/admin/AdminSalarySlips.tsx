@@ -3,31 +3,50 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SalarySlipForm } from "@/components/dashboard/SalarySlipForm";
 import { SalarySlipsTable } from "@/components/dashboard/SalarySlipsTable";
-import { useSalarySlips } from "@/hooks/useSalarySlips";
-import { useProfiles } from "@/hooks/useProfiles";
+import { useSalarySlips, useDeleteSalarySlip, useUpdateSalarySlip } from "@/hooks/useSalarySlips";
 import { Search, Filter, Loader2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
+
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 export default function AdminSalarySlips() {
   const [searchQuery, setSearchQuery] = useState("");
-  const { data: salarySlips = [], isLoading: slipsLoading } = useSalarySlips();
-  const { data: profiles = [], isLoading: profilesLoading } = useProfiles();
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [monthFilter, setMonthFilter] = useState("all");
+  const [page, setPage] = useState(1);
 
-  const isLoading = slipsLoading || profilesLoading;
-
-  // Map slips with profile info
-  const slipsWithInfo = salarySlips.map(slip => {
-    const profile = profiles.find(p => p.user_id === slip.employee_id);
-    return {
-      ...slip,
-      employeeName: profile?.full_name || profile?.email || 'Unknown',
-      department: profile?.department || 'N/A',
-    };
+  const { data: salaryData, isLoading } = useSalarySlips({
+    search: searchQuery,
+    status: statusFilter,
+    month: monthFilter,
+    page,
+    pageSize: 10,
   });
 
-  const filteredSlips = slipsWithInfo.filter(slip =>
-    (slip.employeeName?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
-    (slip.department?.toLowerCase() || '').includes(searchQuery.toLowerCase())
-  );
+  const deleteMutation = useDeleteSalarySlip();
+  const updateMutation = useUpdateSalarySlip();
+
+  const slips = salaryData?.slips || [];
+  const totalPages = salaryData?.totalPages || 1;
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteMutation.mutateAsync(id);
+      toast.success("Salary slip deleted successfully");
+    } catch (error) {
+      toast.error("Failed to delete salary slip");
+    }
+  };
+
+  const handleStatusChange = async (id: string, status: 'pending' | 'approved' | 'paid') => {
+    try {
+      await updateMutation.mutateAsync({ id, status });
+      toast.success(`Status updated to ${status}`);
+    } catch (error) {
+      toast.error("Failed to update status");
+    }
+  };
 
   if (isLoading) {
     return (
@@ -50,29 +69,80 @@ export default function AdminSalarySlips() {
       <SalarySlipForm />
 
       {/* Search and Filter */}
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-wrap items-center gap-4">
+        <div className="relative flex-1 min-w-[200px] max-w-sm">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search by name or department..."
             className="pl-10"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(1);
+            }}
           />
         </div>
-        <Button variant="outline">
-          <Filter className="h-4 w-4 mr-2" />
-          Filters
-        </Button>
+        <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
+          <SelectTrigger className="w-[150px]">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="approved">Approved</SelectItem>
+            <SelectItem value="paid">Paid</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={monthFilter} onValueChange={(v) => { setMonthFilter(v); setPage(1); }}>
+          <SelectTrigger className="w-[150px]">
+            <SelectValue placeholder="Month" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Months</SelectItem>
+            {MONTHS.map(m => (
+              <SelectItem key={m} value={m}>{m}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Table */}
-      {filteredSlips.length === 0 ? (
+      {slips.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
           No salary slips found.
         </div>
       ) : (
-        <SalarySlipsTable slips={filteredSlips} />
+        <>
+          <SalarySlipsTable 
+            slips={slips} 
+            onDelete={handleDelete}
+            onStatusChange={handleStatusChange}
+            isAdmin={true}
+          />
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page === 1}
+                onClick={() => setPage(p => p - 1)}
+              >
+                Previous
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                Page {page} of {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page === totalPages}
+                onClick={() => setPage(p => p + 1)}
+              >
+                Next
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

@@ -8,24 +8,29 @@ import { Search, Download, Loader2 } from "lucide-react";
 
 export default function EmployeeSalarySlips() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(1);
   const { user } = useAuth();
-  const { data: salarySlips = [], isLoading } = useSalarySlips();
+
+  const { data: salaryData, isLoading } = useSalarySlips({
+    search: searchQuery,
+    page,
+    pageSize: 10,
+  });
 
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
 
+  const slips = salaryData?.slips || [];
+  const total = salaryData?.total || 0;
+  const totalPages = salaryData?.totalPages || 1;
+
   // Add employee name to slips for display
-  const mySlips = salarySlips.map(s => ({
+  const mySlips = slips.map(s => ({
     ...s,
     employeeName: userName,
     department: 'Employee',
   }));
-  
-  const filteredSlips = mySlips.filter(slip =>
-    slip.month.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    slip.year.toString().includes(searchQuery)
-  );
 
-  const totalEarnings = mySlips.reduce((sum, s) => sum + s.net_salary, 0);
+  const totalEarnings = slips.reduce((sum, s) => sum + s.net_salary, 0);
 
   if (isLoading) {
     return (
@@ -52,7 +57,7 @@ export default function EmployeeSalarySlips() {
       <div className="grid gap-4 md:grid-cols-3">
         <div className="stat-card">
           <p className="text-sm text-muted-foreground">Total Slips</p>
-          <p className="text-2xl font-semibold text-foreground">{mySlips.length}</p>
+          <p className="text-2xl font-semibold text-foreground">{total}</p>
         </div>
         <div className="stat-card">
           <p className="text-sm text-muted-foreground">Total Earnings</p>
@@ -63,7 +68,7 @@ export default function EmployeeSalarySlips() {
         <div className="stat-card">
           <p className="text-sm text-muted-foreground">Average Monthly</p>
           <p className="text-2xl font-semibold text-foreground">
-            ₹{mySlips.length > 0 ? Math.round(totalEarnings / mySlips.length).toLocaleString('en-IN') : 0}
+            ₹{total > 0 ? Math.round(totalEarnings / total).toLocaleString('en-IN') : 0}
           </p>
         </div>
       </div>
@@ -75,17 +80,30 @@ export default function EmployeeSalarySlips() {
           placeholder="Search by month or year..."
           className="pl-10"
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
         />
       </div>
 
       {/* Table */}
-      {filteredSlips.length === 0 ? (
+      {mySlips.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
           No salary slips found.
         </div>
       ) : (
-        <SalarySlipsTable slips={filteredSlips} showEmployee={false} />
+        <>
+          <SalarySlipsTable slips={mySlips} showEmployee={false} />
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2">
+              <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(p => p - 1)}>
+                Previous
+              </Button>
+              <span className="text-sm text-muted-foreground">Page {page} of {totalPages}</span>
+              <Button variant="outline" size="sm" disabled={page === totalPages} onClick={() => setPage(p => p + 1)}>
+                Next
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
