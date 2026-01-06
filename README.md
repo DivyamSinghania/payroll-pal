@@ -1,73 +1,147 @@
-# Welcome to your Lovable project
+# 🧾 Payroll Management System – Full Stack
 
-## Project info
+A complete role-based payroll management web application built as part of the Full-Stack Developer Internship Assignment.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+---
 
-## How can I edit this code?
+## 🚀 Project Overview
 
-There are several ways of editing your application.
+This project implements a functional **Payroll Management System** with:
 
-**Use Lovable**
+- Secure authentication
+- Admin & Employee roles
+- Salary slip management
+- Expense tracking
+- Interactive dashboards
+- Clean UI & scalable backend architecture
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+It follows modern full-stack development best practices.
 
-Changes made via Lovable will be committed automatically to this repo.
+---
 
-**Use your preferred IDE**
+## 🧑‍💻 Tech Stack
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Frontend
+- **React + TypeScript** – Component-based UI development
+- **Tailwind CSS** – Utility-first styling with responsive design
+- **TanStack React Query** – Efficient server state management
+- **ShadCN UI** – Clean, accessible UI components
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Backend / Database
+- **Supabase (PostgreSQL)** – Managed relational database
+- **Supabase Auth** – Email/password authentication
+- **Row Level Security (RLS)** – Role-based access control
 
-Follow these steps:
+### Deployment & Tooling
+- **Vite** – Fast development environment
+- **GitHub** – Version control & submission
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+---
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## 🧠 Why This Tech Stack?
 
-# Step 3: Install the necessary dependencies.
-npm i
+| Requirement | Chosen Solution | Reason |
+|-----------|---------------|--------|
+Scalable database | PostgreSQL (Supabase) | ACID compliant, relational, production-grade |
+Secure authentication | Supabase Auth | Built-in auth with session management |
+Role-based access | PostgreSQL RLS | Enforces security directly at DB level |
+Modern frontend | React + Tailwind | Fast UI development & responsive UX |
+State management | React Query | Efficient caching & API synchronization |
+Maintainable code | TypeScript | Type safety & long-term scalability |
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+---
+
+
+---
+
+## 🛠️ Setup Instructions
+
+### 1️⃣ Clone Repository
+
+```bash
+git clone https://github.com/DivyamSinghania/payroll-pal
+cd payroll-management-system
+```
+2️⃣ Install Dependencies
+```bash
+npm install
+```
+
+3️⃣ Environment Variables
+
+Create a .env file in root folder:
+VITE_SUPABASE_PROJECT_ID= your_project_id
+VITE_SUPABASE_PUBLISHABLE_KEY= your_key
+VITE_SUPABASE_URL= your_URL
+
+4️⃣ Run the Application
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The app will run at:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+http://localhost:8080
 
-**Use GitHub Codespaces**
+5️⃣ Demo Credentials
+Email: hire-me@anshumat.org
+Password: HireMe@2025!
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+🧩 **Core Features**
+Authentication
 
-## What technologies are used for this project?
+Secure login & signup
 
-This project is built with:
+Role-based access control
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Admin Capabilities
 
-## How can I deploy this project?
+Create & manage employees
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+Generate & update salary slips
 
-## Can I connect a custom domain to my Lovable project?
+Review expenses
 
-Yes, you can!
+Payroll analytics
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Employee Capabilities
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+View salary slips
+
+Submit monthly expenses
+
+Track expense history
+
+Dashboards
+
+Salary & expense trends
+
+Interactive charts
+
+Clean data tables
+
+🧪 **Bonus Features**
+
+Search & filters
+
+Pagination
+
+Approval workflow
+
+Responsive UI
+
+Optimized queries & caching
+
+🏁 **Conclusion**
+
+This project demonstrates:
+
+Strong full-stack development skills
+
+Secure backend architecture
+
+Clean frontend design
+
+Scalable system planning
+
+Designed to meet real-world payroll requirements with maintainable and extensible code.
