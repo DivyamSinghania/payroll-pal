@@ -17,7 +17,7 @@ export interface SalarySlip {
 }
 
 export interface SalarySlipWithEmployee extends SalarySlip {
-  employee_name?: string;
+  employeeName?: string;
   department?: string;
 }
 
@@ -84,7 +84,7 @@ export function useSalarySlips(filters: SalarySlipFilters = {}) {
 
         slips = slips.map(slip => ({
           ...slip,
-          employee_name: profileMap.get(slip.employee_id)?.full_name || 'Unknown',
+          employeeName: profileMap.get(slip.employee_id)?.full_name || 'Unknown',
           department: profileMap.get(slip.employee_id)?.department || 'N/A',
         })) as SalarySlipWithEmployee[];
       }
@@ -93,7 +93,7 @@ export function useSalarySlips(filters: SalarySlipFilters = {}) {
       if (search && role === 'admin') {
         const searchLower = search.toLowerCase();
         slips = (slips as SalarySlipWithEmployee[]).filter(s =>
-          s.employee_name?.toLowerCase().includes(searchLower) ||
+          s.employeeName?.toLowerCase().includes(searchLower) ||
           s.department?.toLowerCase().includes(searchLower) ||
           s.month.toLowerCase().includes(searchLower)
         );

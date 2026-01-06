@@ -15,6 +15,15 @@ export interface Employee {
   created_at: string;
   updated_at: string;
 }
+export interface CreateEmployeeInput {
+  email: string;
+  full_name: string;
+  department: string;
+  designation: string;
+  salary: number;
+  status: string;
+}
+
 
 export interface EmployeeFilters {
   search?: string;
@@ -92,6 +101,34 @@ export function useEmployees(filters: EmployeeFilters = {}) {
     enabled: !!user && role === 'admin',
   });
 }
+
+export function useCreateEmployee() {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, CreateEmployeeInput>({
+    mutationFn: async (payload) => {
+      const { error } = await supabase
+  .from("profiles")
+  .insert<CreateEmployeeInput & { role: string }>({
+
+        email: payload.email,
+        full_name: payload.full_name,
+        department: payload.department,
+        designation: payload.designation,
+        salary: payload.salary,
+        status: payload.status,
+        role: "employee",
+      });
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["employees"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-dashboard-stats"] });
+    },
+  });
+}
+
 
 export function useUpdateEmployee() {
   const queryClient = useQueryClient();

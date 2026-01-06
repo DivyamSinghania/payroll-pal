@@ -33,7 +33,7 @@ export function SalarySlipsTable({ slips, showEmployee = true }: SalarySlipsTabl
   };
 
   return (
-    <div className="rounded-xl border border-border bg-card overflow-hidden">
+    <div className="rounded-xl border border-border bg-card overflow-scrol">
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/50 hover:bg-muted/50">
@@ -48,10 +48,13 @@ export function SalarySlipsTable({ slips, showEmployee = true }: SalarySlipsTabl
           </TableRow>
         </TableHeader>
         <TableBody>
-          {slips.map((slip) => (
-            <TableRow key={slip.id} className="table-row-hover">
+          {slips.map((slip) => {
+            console.log(slip);
+            return(<TableRow key={slip.id} className="table-row-hover ">
               {showEmployee && (
+                
                 <TableCell>
+                  
                   <div>
                     <p className="font-medium text-foreground">{slip.employeeName}</p>
                     <p className="text-xs text-muted-foreground">{slip.department}</p>
@@ -80,8 +83,8 @@ export function SalarySlipsTable({ slips, showEmployee = true }: SalarySlipsTabl
                   </Button>
                 </div>
               </TableCell>
-            </TableRow>
-          ))}
+            </TableRow>)
+  })}
         </TableBody>
       </Table>
     </div>

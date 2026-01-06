@@ -12,6 +12,7 @@ import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminSalarySlips from "./pages/admin/AdminSalarySlips";
 import AdminEmployees from "./pages/admin/AdminEmployees";
+import AdminExpenses from "./pages/admin/AdminExpenses"; 
 import EmployeeDashboard from "./pages/employee/EmployeeDashboard";
 import EmployeeSalarySlips from "./pages/employee/EmployeeSalarySlips";
 import EmployeeExpenses from "./pages/employee/EmployeeExpenses";
@@ -42,6 +43,7 @@ const App = () => (
               <Route index element={<AdminDashboard />} />
               <Route path="salary-slips" element={<AdminSalarySlips />} />
               <Route path="employees" element={<AdminEmployees />} />
+              <Route path="expenses" element={<AdminExpenses />} />
             </Route>
             
             {/* Employee Routes */}

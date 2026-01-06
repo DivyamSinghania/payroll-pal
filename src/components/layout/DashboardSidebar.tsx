@@ -20,6 +20,7 @@ const adminLinks = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/admin/salary-slips', label: 'Salary Slips', icon: FileText },
   { to: '/admin/employees', label: 'Employees', icon: Users },
+  { to: '/admin/expenses', label: 'Expenses', icon: Receipt },
 ];
 
 const employeeLinks = [
