@@ -102,33 +102,6 @@ export function useEmployees(filters: EmployeeFilters = {}) {
   });
 }
 
-export function useCreateEmployee() {
-  const queryClient = useQueryClient();
-
-  return useMutation<void, Error, CreateEmployeeInput>({
-    mutationFn: async (payload) => {
-      const { error } = await supabase
-  .from("profiles")
-  .insert<CreateEmployeeInput & { role: string }>({
-
-        email: payload.email,
-        full_name: payload.full_name,
-        department: payload.department,
-        designation: payload.designation,
-        salary: payload.salary,
-        status: payload.status,
-        role: "employee",
-      });
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["employees"] });
-      queryClient.invalidateQueries({ queryKey: ["admin-dashboard-stats"] });
-    },
-  });
-}
-
 
 export function useUpdateEmployee() {
   const queryClient = useQueryClient();
