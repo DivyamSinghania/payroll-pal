@@ -147,7 +147,7 @@ export function LoginForm({ onSwitchToSignup }: LoginFormProps) {
         )}
       </Button>
 
-      <p className="text-center text-sm text-muted-foreground">
+      {/* <p className="text-center text-sm text-muted-foreground">
         Don't have an account?{' '}
         <button
           type="button"
@@ -156,7 +156,7 @@ export function LoginForm({ onSwitchToSignup }: LoginFormProps) {
         >
           Sign up
         </button>
-      </p>
+      </p> */}
     </form>
   );
 }
